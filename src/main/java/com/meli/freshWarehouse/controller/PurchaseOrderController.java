@@ -1,6 +1,7 @@
 package com.meli.freshWarehouse.controller;
 
 import com.meli.freshWarehouse.dto.PurchaseOrderDto;
+import com.meli.freshWarehouse.dto.PurchaseOrderResponseDTO;
 import com.meli.freshWarehouse.dto.PurchaseOrderTotalPriceDTO;
 import com.meli.freshWarehouse.model.PurchaseOrder;
 import com.meli.freshWarehouse.service.ProductService;
@@ -22,7 +23,7 @@ public class PurchaseOrderController {
     }
 
     @PostMapping
-    public ResponseEntity<PurchaseOrderTotalPriceDTO> save(@RequestBody PurchaseOrderDto purchaseOrderDto) {
+    public ResponseEntity<PurchaseOrderResponseDTO> save(@RequestBody PurchaseOrderDto purchaseOrderDto) {
         return new ResponseEntity<>(purchaseOrderService.save(purchaseOrderDto), HttpStatus.CREATED);
     }
 

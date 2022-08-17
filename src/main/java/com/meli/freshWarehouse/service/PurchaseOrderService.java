@@ -1,12 +1,9 @@
 package com.meli.freshWarehouse.service;
 
-import com.meli.freshWarehouse.dto.PurchaseOrderDto;
-import com.meli.freshWarehouse.dto.PurchaseOrderTotalPriceDTO;
+import com.meli.freshWarehouse.dto.*;
 import com.meli.freshWarehouse.exception.ExceededStock;
 import com.meli.freshWarehouse.exception.NotFoundException;
-import com.meli.freshWarehouse.model.Batch;
-import com.meli.freshWarehouse.model.PurchaseOrder;
-import com.meli.freshWarehouse.model.ShoppingCartProduct;
+import com.meli.freshWarehouse.model.*;
 import com.meli.freshWarehouse.repository.BatchRepo;
 import com.meli.freshWarehouse.repository.PurchaseRepo;
 import com.meli.freshWarehouse.repository.ShoppingCartProductRepo;
@@ -14,13 +11,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
-public class PurchaseOrderService implements IPurchaseOrderService{
+public class PurchaseOrderService implements IPurchaseOrderService {
 
     private final BuyerService buyerService;
     private final WarehouseService warehouseService;
@@ -39,7 +34,7 @@ public class PurchaseOrderService implements IPurchaseOrderService{
     }
 
     @Override
-    public PurchaseOrderTotalPriceDTO save(PurchaseOrderDto purchaseOrderDto) {
+    public PurchaseOrderResponseDTO save(PurchaseOrderDto purchaseOrderDto) {
         Set<ShoppingCartProduct> shoppingCartProducts = new HashSet<>();
         purchaseOrderDto.getShoppingCartProducts().forEach(p -> {
             shoppingCartProducts.add(ShoppingCartProduct.builder()
@@ -64,8 +59,19 @@ public class PurchaseOrderService implements IPurchaseOrderService{
 
         shoppingCartProductRepo.saveAll(shoppingCartProducts);
 
-        return PurchaseOrderTotalPriceDTO.builder()
-                .id(purchaseOrder.getId())
+        Set<ShoppingCartProduct> getPurchaseOrderInDataBaseList = getById(
+                purchaseOrder.getId()).getShoppingCartProducts();
+
+        List<ProductResponseDto> productSavedInCart = new ArrayList<>();
+        List<ProductSuggestionDto> productSuggestion = new ArrayList<>();
+
+        getSuggestionsProduct(getPurchaseOrderInDataBaseList, productSavedInCart, productSuggestion);
+
+        return PurchaseOrderResponseDTO.builder()
+                .orderId(purchaseOrder.getId())
+                .productsInCart(productSavedInCart)
+                .statusOrder(purchaseOrder.getOrderStatus())
+                .suggestionProduct(productSuggestion)
                 .totalPrice(purchaseOrder.getShoppingCartProducts().stream()
                         .reduce(0D,
                                 (partialTotalPrice, shoppingCartProduct) ->
@@ -74,15 +80,33 @@ public class PurchaseOrderService implements IPurchaseOrderService{
                 .build();
     }
 
+    private void getSuggestionsProduct(Set<ShoppingCartProduct> getPurchaseOrderInDataBaseList, List<ProductResponseDto> productSavedInCart, List<ProductSuggestionDto> productSuggestion) {
+        for (ShoppingCartProduct productList: getPurchaseOrderInDataBaseList) {
+            productSavedInCart.add(ProductResponseDto.builder()
+                    .productName(productList.getProduct().getName())
+                    .quantity(productList.getQuantity())
+                    .build());
+
+           List<String> sectionsNames = productList.getProduct().getSections().stream().map(s -> s.getName())
+                    .collect(Collectors.toList());
+
+            for (String sectionName: sectionsNames) {
+                productSuggestion.addAll(batchRepo.getStockBySectionName(sectionName));
+            }
+
+        }
+    }
+
     @Override
     public PurchaseOrder getById(Long purchaseOrderId) {
-        return purchaseRepo.findById(purchaseOrderId).orElseThrow(() -> new NotFoundException("Can't find purchase order with the informed id"));
+        return purchaseRepo.findById(purchaseOrderId).orElseThrow(
+                () -> new NotFoundException("Can't find purchase order with the informed id"));
     }
 
     @Override
     public PurchaseOrderTotalPriceDTO finalizePurchaseOrder(Long purchaseOrderId) {
         PurchaseOrder purchaseOrder = this.getById(purchaseOrderId);
-        if(purchaseOrder.getOrderStatus().equals("CLOSE")) {
+        if (purchaseOrder.getOrderStatus().equals("CLOSE")) {
             throw new NotFoundException("Not permitted");
         }
 
@@ -109,17 +133,17 @@ public class PurchaseOrderService implements IPurchaseOrderService{
             Long totalOfQuantityInStock = warehouseService.getStockOfProductById(p.getProduct().getId()).getWarehouses().stream()
                     .reduce(0L,
                             (partialQuantity, warehouse) -> partialQuantity + warehouse.getTotalQuantity(), Long::sum);
-            if(totalOfQuantityInStock < p.getQuantity() ) {
+            if (totalOfQuantityInStock < p.getQuantity()) {
                 throw new ExceededStock("Quantity of " + p.getProduct().getName() + " in purchase order exceeds current stock value. Total quantity in stock: "
                         + totalOfQuantityInStock);
             }
             int totalOfQuantityInStockWithDueDateAvailable = 0;
-            for(Batch b : p.getProduct().getListBatch()) {
-                if(b.getDueDate().isAfter(LocalDate.now().plusWeeks(3))) {
+            for (Batch b : p.getProduct().getListBatch()) {
+                if (b.getDueDate().isAfter(LocalDate.now().plusWeeks(3))) {
                     totalOfQuantityInStockWithDueDateAvailable += b.getCurrentQuantity();
                 }
             }
-            if(totalOfQuantityInStockWithDueDateAvailable < p.getQuantity() ) {
+            if (totalOfQuantityInStockWithDueDateAvailable < p.getQuantity()) {
                 throw new NotFoundException("Can't add " + p.getProduct().getName() + " to shopping cart. " + p.getProduct().getName() + " expiring date already expirated.");
             }
         });
@@ -129,14 +153,14 @@ public class PurchaseOrderService implements IPurchaseOrderService{
         List<Batch> batchList = new ArrayList<>();
         purchaseOrder.getShoppingCartProducts().stream().forEach(p -> {
             Integer quantity = p.getQuantity();
-            for(Batch b : p.getProduct().getListBatch()) {
-                if(b.getDueDate().isAfter(LocalDate.now().plusWeeks(3))) {
+            for (Batch b : p.getProduct().getListBatch()) {
+                if (b.getDueDate().isAfter(LocalDate.now().plusWeeks(3))) {
                     if (quantity == 0) {
                         break;
-                    } else if(quantity > b.getCurrentQuantity()) {
+                    } else if (quantity > b.getCurrentQuantity()) {
                         quantity = quantity - b.getCurrentQuantity();
                         b.setCurrentQuantity(0);
-                    } else if(quantity < b.getCurrentQuantity()) {
+                    } else if (quantity < b.getCurrentQuantity()) {
                         b.setCurrentQuantity(b.getCurrentQuantity() - quantity);
                         quantity = 0;
                     } else {
