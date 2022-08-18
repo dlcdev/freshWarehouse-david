@@ -2,6 +2,8 @@ package com.meli.freshWarehouse.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -9,9 +11,9 @@ import lombok.*;
 @Builder
 public class ProductSuggestionResponseDto {
 
-    private Long productId;
-    private String productName;
-    private Integer quantity;
-    private Double price;
+    private Long orderId;
+    private String statusOrder;
+    private Double totalPrice;
+    private List<ProductResponseDto> productsInCart;
 
 }

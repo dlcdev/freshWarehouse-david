@@ -72,12 +72,17 @@ public class PurchaseOrderService implements IPurchaseOrderService {
                 .productsInCart(productSavedInCart)
                 .statusOrder(purchaseOrder.getOrderStatus())
                 .suggestionProduct(productSuggestion)
-                .totalPrice(purchaseOrder.getShoppingCartProducts().stream()
-                        .reduce(0D,
-                                (partialTotalPrice, shoppingCartProduct) ->
-                                        partialTotalPrice + (shoppingCartProduct.getProduct().getPrice() * shoppingCartProduct.getQuantity()), Double::sum)
-                )
+                .totalPrice(getTotalPrice(purchaseOrder.getShoppingCartProducts()))
                 .build();
+    }
+
+    public static Double getTotalPrice(Set<ShoppingCartProduct> shoppingCartProducts) {
+        return shoppingCartProducts.stream()
+                .reduce(0D,
+                        (partialTotalPrice, shoppingCartProduct) ->
+                                partialTotalPrice +
+                                        (shoppingCartProduct.getProduct().getPrice()
+                                                * shoppingCartProduct.getQuantity()), Double::sum);
     }
 
     private void getSuggestionsProduct(Set<ShoppingCartProduct> getPurchaseOrderInDataBaseList, List<ProductResponseDto> productSavedInCart, List<ProductSuggestionDto> productSuggestion) {

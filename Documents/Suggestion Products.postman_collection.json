@@ -1,0 +1,61 @@
+{
+	"info": {
+		"_postman_id": "426d7baa-bf27-48a7-9e25-34d18159a14d",
+		"name": "Suggestion Products",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Insert",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"date\": \"2022-08-16\",\n    \"buyerId\": 1,\n    \"shoppingCartProducts\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 1\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/fresh-products/purchase-order",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"fresh-products",
+						"purchase-order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all products in cart",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/v1/fresh-products/suggestions",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"fresh-products",
+						"suggestions"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -18,7 +18,7 @@ public interface BatchRepo extends JpaRepository<Batch, Long> {
     @Query(value = "SELECT new com.meli.freshWarehouse.dto.ProductSuggestionDto(p.id, p.name, b.currentQuantity, p.price) " +
             "FROM Batch b " +
             "INNER JOIN Product p ON b.product.id = p.id " +
-            "INNER JOIN Section s on b.section.id = s.id where s.name = :sectionName"
+            "INNER JOIN Section s on b.section.id = s.id where s.name = :sectionName and b.currentQuantity > 0"
     )
     List<ProductSuggestionDto> getStockBySectionName(@Param("sectionName") String sectionName);
 

@@ -4,26 +4,57 @@
 
 ## Sobre
 
-O FreshWarehouse é uma aplicação feita para ajudar a administrar um estoque de produtos frescos em um Marketplace. Consultando sua API é possivel passar por todo o processo desde quando um vendedor cadastra um produto, até ele ser adicionado em um lote, enviado para um armazem, até ser adicionado em um carrinho de compras por um usuário.
+Essa aplicação tem como base o projeto desenvolvido em: [Freshwarehouse](https://github.com/javatastico/freshWarehouse).
+Porém com um requisito extra para realizar gerencia de uma lista de desejos do usuário.
 
 
-## Tecnologias Utilizadas
+## Requisito desenvolvido
 
-O projeto foi desenvolvido utilizando o framework [Spring](https://spring.io/projects/spring-boot) escrito em [Java](https://www.java.com/pt-BR/) e os testes foram feitos utilizando o [JUnit](https://junit.org/junit5/). A API funciona por meio de requisições HTTP, e como meta futura, o deploy seria feito por meio do Fury. A gerencia de dependências é feita pelo [Maven](https://maven.apache.org/).
+Após inserir um novo produto e o retorno trara uma lista de produtos com as sugestões relacionados aos 
+produtudos inseridos
 
 ## Documentação
 
-Documentação da API foi feita em JavaDoc, assim como as collections do postman para fazerem as requisições podem ser encontradas em: [Documentos](https://github.com/javatastico/freshWarehouse/tree/develop/Documents).
+A documentação completa da história de usuário pode ser baixado em: [Documents](https://github.com/dlcdev/freshWarehouse-david/blob/4c421b49151ca7c206c17558efe90b1056937cb6/Documents/David%20Requisito%206%20-%20Template.pdf).
+
+
+## Como subir o projeto
+
+Ao inicializar o projeto serão criados alguns dados iniciais no banco. Estes dados são gerados por meio do script data.sql que
+pode ser encontrado na pasta de resources. Caso não possua nenhum dado no seu banco mesmo após o levantamento do projeto, rode os seguintes comandos em ordem:
+
+```SQL
+use fresh_warehouse_db;
+
+INSERT INTO warehouse(address, city, country, number, state) values('Address 1', 'City 1', 'Country 1', 1, 'State 1');
+INSERT INTO section(name, id_warehouse, available_space) values('Fresh', 1, 100);
+INSERT INTO seller(name) values('Seller Name');
+INSERT INTO buyer(name) VALUES ('Buyer Name');
+```
+
+Após esta inicialização dos dados básicos, é necessário criar um produto através de uma requisição.
+Para criar este produto, primeiramente,
+importe no seu Postman a Collection [Documents](https://github.com/MateusMeli/freshWarehouse-Mateus/blob/feature/US06_Wishlist/Documents/collections/US06%20-%20Mateus.postman_collection.json)
+, depois disso, abra a requisição de "Post Product" e aperte para enviar. Caso a importação da collection
+fornecida não tenha funcionado, realize uma requisição do tipo POST na rota:
+http://localhost:8080/api/v1/fresh-products/product passando como body:
+
+```JSON
+{
+    "name": "Apple",
+    "price": 10.00,
+    "sectionsId": [1],
+    "sellerId": 1
+}
+```
+
+Após esta requisição já podemos visitar os 4 endpoints do requisito em si.
+
+### Add to Wishlist
 
 
 ## UML
 
 <p align="center">
-  <img src="https://github.com/javatastico/freshWarehouse/blob/develop/Documents/UML.png?raw=true">
+  <img src="https://github.com/MateusMeli/freshWarehouse-Mateus/blob/feature/US06_Wishlist/Documents/UML.png?raw=true">
 </p>
-
-## Licença
-
-Este projeto está licenciado sob os termos da [licença MIT](https://github.com/javatastico/freshWarehouse/blob/develop/LICENSE).
-
-Copyright (c) 2022 Javatastico
