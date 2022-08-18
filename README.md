@@ -34,7 +34,7 @@ INSERT INTO buyer(name) VALUES ('Buyer Name');
 
 Após esta inicialização dos dados básicos, é necessário criar um produto através de uma requisição.
 Para criar este produto, primeiramente,
-importe no seu Postman a Collection [Documents](https://github.com/MateusMeli/freshWarehouse-Mateus/blob/feature/US06_Wishlist/Documents/collections/US06%20-%20Mateus.postman_collection.json)
+importe no seu Postman a Collection [Documents](https://github.com/dlcdev/freshWarehouse-david/blob/45025004156a211a9d2d9c34b0a87e6bae10f3aa/Documents/collections/Products.json)
 , depois disso, abra a requisição de "Post Product" e aperte para enviar. Caso a importação da collection
 fornecida não tenha funcionado, realize uma requisição do tipo POST na rota:
 http://localhost:8080/api/v1/fresh-products/product passando como body:
@@ -48,7 +48,9 @@ http://localhost:8080/api/v1/fresh-products/product passando como body:
 }
 ```
 
-Após esta requisição já podemos visitar os 4 endpoints do requisito em si.
+Após esta requisição já podemos visitar os endpoints do requisito em si.
+Inporte a colletcion [Collection test](https://github.com/dlcdev/freshWarehouse-david/blob/45025004156a211a9d2d9c34b0a87e6bae10f3aa/Documents/Suggestion%20Products.postman_collection.json)
+
 
 ### Add to Wishlist
 
