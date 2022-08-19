@@ -86,16 +86,16 @@ public class PurchaseOrderService implements IPurchaseOrderService {
     }
 
     private void getSuggestionsProduct(Set<ShoppingCartProduct> getPurchaseOrderInDataBaseList, List<ProductResponseDto> productSavedInCart, List<ProductSuggestionDto> productSuggestion) {
-        for (ShoppingCartProduct productList: getPurchaseOrderInDataBaseList) {
+        for (ShoppingCartProduct productList : getPurchaseOrderInDataBaseList) {
             productSavedInCart.add(ProductResponseDto.builder()
                     .productName(productList.getProduct().getName())
                     .quantity(productList.getQuantity())
                     .build());
 
-           List<String> sectionsNames = productList.getProduct().getSections().stream().map(s -> s.getName())
+            List<String> sectionsNames = productList.getProduct().getSections().stream().map(s -> s.getName())
                     .collect(Collectors.toList());
 
-            for (String sectionName: sectionsNames) {
+            for (String sectionName : sectionsNames) {
                 productSuggestion.addAll(batchRepo.getStockBySectionName(sectionName));
             }
 
