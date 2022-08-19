@@ -8,5 +8,6 @@ import com.meli.freshWarehouse.model.PurchaseOrder;
 public interface IPurchaseOrderService {
     PurchaseOrderResponseDTO save(PurchaseOrderDto purchaseOrderDto);
     PurchaseOrder getById(Long purchaseOrderId);
-    PurchaseOrderTotalPriceDTO finalizePurchaseOrder(Long purchaseOrderId);
+    PurchaseOrderTotalPriceDTO finalizePurchaseOrder(Long purchaseOrderId, PurchaseOrderDto purchaseOrderDto);
+
 }

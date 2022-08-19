@@ -52,9 +52,6 @@ Após esta requisição já podemos visitar os endpoints do requisito em si.
 Inporte a colletcion [Collection test](https://github.com/dlcdev/freshWarehouse-david/blob/45025004156a211a9d2d9c34b0a87e6bae10f3aa/Documents/Suggestion%20Products.postman_collection.json)
 
 
-### Add to Wishlist
-
-
 ## UML
 
 <p align="center">

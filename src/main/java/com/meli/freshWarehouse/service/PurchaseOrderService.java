@@ -109,7 +109,7 @@ public class PurchaseOrderService implements IPurchaseOrderService {
     }
 
     @Override
-    public PurchaseOrderTotalPriceDTO finalizePurchaseOrder(Long purchaseOrderId) {
+    public PurchaseOrderTotalPriceDTO finalizePurchaseOrder(Long purchaseOrderId, PurchaseOrderDto purchaseOrderDto) {
         PurchaseOrder purchaseOrder = this.getById(purchaseOrderId);
         if (purchaseOrder.getOrderStatus().equals("CLOSE")) {
             throw new NotFoundException("Not permitted");
