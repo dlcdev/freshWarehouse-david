@@ -44,12 +44,14 @@ public class PurchaseOrderService implements IPurchaseOrderService {
         });
 
 
-        PurchaseOrder purchaseOrder = purchaseRepo.save(PurchaseOrder.builder()
+        PurchaseOrder inputPurchase = PurchaseOrder.builder()
                 .buyer(buyerService.getBuyerById(purchaseOrderDto.getBuyerId()))
                 .orderStatus("OPEN")
                 .date(LocalDate.parse(purchaseOrderDto.getDate(),
                         DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .build());
+                .build();
+
+        PurchaseOrder purchaseOrder = purchaseRepo.save(inputPurchase);
 
         shoppingCartProducts.forEach(p -> {
             p.setPurchaseOrder(purchaseOrder);
@@ -63,9 +65,9 @@ public class PurchaseOrderService implements IPurchaseOrderService {
                 purchaseOrder.getId()).getShoppingCartProducts();
 
         List<ProductResponseDto> productSavedInCart = new ArrayList<>();
-        List<ProductSuggestionDto> productSuggestion = new ArrayList<>();
 
-        getSuggestionsProduct(getPurchaseOrderInDataBaseList, productSavedInCart, productSuggestion);
+        List<ProductSuggestionDto> productSuggestion =
+                getSuggestionsProduct(getPurchaseOrderInDataBaseList, productSavedInCart);
 
         return PurchaseOrderResponseDTO.builder()
                 .orderId(purchaseOrder.getId())
@@ -85,7 +87,9 @@ public class PurchaseOrderService implements IPurchaseOrderService {
                                                 * shoppingCartProduct.getQuantity()), Double::sum);
     }
 
-    private void getSuggestionsProduct(Set<ShoppingCartProduct> getPurchaseOrderInDataBaseList, List<ProductResponseDto> productSavedInCart, List<ProductSuggestionDto> productSuggestion) {
+    public List<ProductSuggestionDto> getSuggestionsProduct(Set<ShoppingCartProduct> getPurchaseOrderInDataBaseList, List<ProductResponseDto> productSavedInCart) {
+        List<ProductSuggestionDto> productSuggestion = new ArrayList<>();
+
         for (ShoppingCartProduct productList : getPurchaseOrderInDataBaseList) {
             productSavedInCart.add(ProductResponseDto.builder()
                     .productName(productList.getProduct().getName())
@@ -100,6 +104,7 @@ public class PurchaseOrderService implements IPurchaseOrderService {
             }
 
         }
+        return productSuggestion;
     }
 
     @Override
@@ -109,7 +114,7 @@ public class PurchaseOrderService implements IPurchaseOrderService {
     }
 
     @Override
-    public PurchaseOrderTotalPriceDTO finalizePurchaseOrder(Long purchaseOrderId, PurchaseOrderDto purchaseOrderDto) {
+    public PurchaseOrderTotalPriceDTO finalizePurchaseOrder(Long purchaseOrderId) {
         PurchaseOrder purchaseOrder = this.getById(purchaseOrderId);
         if (purchaseOrder.getOrderStatus().equals("CLOSE")) {
             throw new NotFoundException("Not permitted");

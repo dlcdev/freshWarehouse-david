@@ -1,10 +1,11 @@
 package com.meli.freshWarehouse.service;
 
-import com.meli.freshWarehouse.dto.ProductResponseDto;
-import com.meli.freshWarehouse.dto.ProductSuggestionResponseDto;
+import com.meli.freshWarehouse.dto.*;
 import com.meli.freshWarehouse.model.PurchaseOrder;
 import com.meli.freshWarehouse.model.ShoppingCartProduct;
+import com.meli.freshWarehouse.repository.BatchRepo;
 import com.meli.freshWarehouse.repository.PurchaseRepo;
+import com.meli.freshWarehouse.repository.ShoppingCartProductRepo;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,8 +19,22 @@ public class SuggestionProductsService implements ISuggestionProducts {
 
     private final PurchaseRepo purchaseRepo;
 
-    public SuggestionProductsService(PurchaseRepo purchaseRepo) {
+    private final PurchaseOrderService purchaseOrderService;
+    private final ProductService productService;
+    private final ShoppingCartProductRepo shoppingCartProductRepo;
+
+    private final BuyerService buyerService;
+
+    private final BatchRepo batchRepo;
+
+
+    public SuggestionProductsService(PurchaseRepo purchaseRepo, PurchaseOrderService purchaseOrderService, ProductService productService, ShoppingCartProductRepo shoppingCartProductRepo, BuyerService buyerService, BatchRepo batchRepo) {
         this.purchaseRepo = purchaseRepo;
+        this.purchaseOrderService = purchaseOrderService;
+        this.productService = productService;
+        this.shoppingCartProductRepo = shoppingCartProductRepo;
+        this.buyerService = buyerService;
+        this.batchRepo = batchRepo;
     }
 
     @Override
@@ -29,6 +44,45 @@ public class SuggestionProductsService implements ISuggestionProducts {
         List<ProductSuggestionResponseDto> productSuggestionResponseDtoList = new ArrayList<>();
 
         return getProductSuggestion(purchaseOrder, productSuggestionResponseDtoList);
+    }
+
+    @Override
+    public PurchaseOrderResponseDTO save(ProductSDto productSDto) {
+
+        PurchaseOrder getPurchaseOrderInDataBaseList = purchaseOrderService.getById(productSDto.getOrderId());
+
+        productSDto.getNewProducts().forEach(p -> {
+            getPurchaseOrderInDataBaseList.getShoppingCartProducts().add(
+                    ShoppingCartProduct
+                            .builder()
+                            .product(productService.getProductById(p.getProductId()))
+                            .quantity(p.getQuantity())
+                            .build()
+            );
+        });
+
+        for (ShoppingCartProduct shopping : getPurchaseOrderInDataBaseList.getShoppingCartProducts()) {
+            System.out.println(shopping.getId());
+            if (shopping.getId() == null) {
+                shopping.setPurchaseOrder(getPurchaseOrderInDataBaseList);
+            }
+        }
+
+        shoppingCartProductRepo.saveAll(getPurchaseOrderInDataBaseList.getShoppingCartProducts());
+
+        List<ProductResponseDto> productSavedInCart = new ArrayList<>();
+
+        List<ProductSuggestionDto> productSuggestion = purchaseOrderService.getSuggestionsProduct(
+                getPurchaseOrderInDataBaseList.getShoppingCartProducts(), productSavedInCart
+        );
+
+        return PurchaseOrderResponseDTO.builder()
+                .orderId(getPurchaseOrderInDataBaseList.getId())
+                .productsInCart(productSavedInCart)
+                .statusOrder(getPurchaseOrderInDataBaseList.getOrderStatus())
+                .suggestionProduct(productSuggestion)
+                .totalPrice(getTotalPrice(getPurchaseOrderInDataBaseList.getShoppingCartProducts()))
+                .build();
     }
 
     private List<ProductSuggestionResponseDto> getProductSuggestion(

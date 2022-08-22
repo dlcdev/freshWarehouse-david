@@ -1,13 +1,11 @@
 package com.meli.freshWarehouse.controller;
 
+import com.meli.freshWarehouse.dto.ProductSDto;
 import com.meli.freshWarehouse.dto.ProductSuggestionResponseDto;
-import com.meli.freshWarehouse.dto.PurchaseOrderDto;
 import com.meli.freshWarehouse.dto.PurchaseOrderResponseDTO;
 import com.meli.freshWarehouse.dto.PurchaseOrderTotalPriceDTO;
-import com.meli.freshWarehouse.model.PurchaseOrder;
 import com.meli.freshWarehouse.service.PurchaseOrderService;
 import com.meli.freshWarehouse.service.SuggestionProductsService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,15 +29,15 @@ public class SuggestionProducts {
     }
 
     @PostMapping
-    public ResponseEntity<PurchaseOrderResponseDTO> save(@RequestBody PurchaseOrderDto purchaseOrderDto) {
-        return new ResponseEntity<>(purchaseOrderService.save(purchaseOrderDto), HttpStatus.CREATED);
+    public ResponseEntity<PurchaseOrderResponseDTO> save(@RequestBody ProductSDto productSDto) {
+        return new ResponseEntity<>(service.save(productSDto), HttpStatus.CREATED);
     }
 
     @PutMapping("/{purchaseOrderId}")
     public ResponseEntity<PurchaseOrderTotalPriceDTO> finalizePurchaseOrder(
-            @PathVariable Long purchaseOrderId, PurchaseOrderDto purchaseOrderDto
+            @PathVariable Long purchaseOrderId
     ) {
-        return ResponseEntity.ok().body(purchaseOrderService.finalizePurchaseOrder(purchaseOrderId, purchaseOrderDto));
+        return ResponseEntity.ok().body(purchaseOrderService.finalizePurchaseOrder(purchaseOrderId));
     }
 
 

@@ -33,7 +33,7 @@ public class PurchaseOrderController {
     }
 
     @PutMapping("/{purchaseOrderId}")
-    public ResponseEntity<PurchaseOrderTotalPriceDTO> finalizePurchaseOrder(@PathVariable Long purchaseOrderId, PurchaseOrderDto purchaseOrderDto) {
-        return ResponseEntity.ok().body(purchaseOrderService.finalizePurchaseOrder(purchaseOrderId, purchaseOrderDto));
+    public ResponseEntity<PurchaseOrderTotalPriceDTO> finalizePurchaseOrder(@PathVariable Long purchaseOrderId) {
+        return ResponseEntity.ok().body(purchaseOrderService.finalizePurchaseOrder(purchaseOrderId));
     }
 }
